@@ -103,6 +103,7 @@ try:
             
             # STOP the robot
             robot.stopcar()
+            time.sleep(1)
             print("Robot Stopped for QR Processing")
             
             # Convert frame to grayscale and match QR code
@@ -138,7 +139,7 @@ try:
         if cx is not None:
             # Calculate the PID output for direction control
             direction_speed = pid_direction(cx)
-            print(f"Direction speed: {direction_speed}")
+            # print(f"Direction speed: {direction_speed}")
 
             # Calculate motor speeds
             turn_scale = 1.0
@@ -150,7 +151,7 @@ try:
             prev_speed_left = left_speed
             prev_speed_right = right_speed
 
-            print(f"Left Speed: {left_speed}, Right Speed: {right_speed}")
+            # print(f"Left Speed: {left_speed}, Right Speed: {right_speed}")
 
             # Send commands to the robot
             robot.changespeed(left_speed, right_speed)
