@@ -29,7 +29,7 @@ pid_direction = PID(Kp=264, Ki=528, Kd=33, setpoint=frame_width // 2)
 pid_direction.output_limits = (-max_speed // 2, max_speed // 2) 
 
 # Load reference QR codes
-reference_qr_paths = ["ref_1.png", "ref_2.png", "ref_0.png"]
+reference_qr_paths = ["ref_1.jpg", "ref_2.jpg", "ref_0.jpg"]
 reference_qrs = [(path, cv2.imread(path, cv2.IMREAD_GRAYSCALE)) for path in reference_qr_paths]
 
 # Helper function: preprocess the image
