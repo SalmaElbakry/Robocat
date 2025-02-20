@@ -20,10 +20,12 @@ video_duration = 45
 frame_width, frame_height = 640, 480
 
 # Robot parameters
-turn_speed = 0x5FFF
-straight_speed = 0x5FFF
-max_speed = 0x5FFF
-
+# turn_speed = 0x5FFF
+# straight_speed = 0x5FFF
+# max_speed = 0x5FFF
+turn_speed = 0
+straight_speed = 0
+max_speed = 0
 # PID Controller for direction
 pid_direction = PID(Kp=264, Ki=528, Kd=33, setpoint=frame_width // 2)
 pid_direction.output_limits = (-max_speed // 2, max_speed // 2) 
