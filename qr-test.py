@@ -20,9 +20,9 @@ video_duration = 45
 frame_width, frame_height = 640, 480
 
 # Robot parameters
-turn_speed = 0x5FFE
-straight_speed = 0x6FFE
-max_speed = 0x6FFF
+turn_speed = 0x5FFF
+straight_speed = 0x5FFF
+max_speed = 0x5FFF
 
 # PID Controller for direction
 pid_direction = PID(Kp=264, Ki=528, Kd=33, setpoint=frame_width // 2)
@@ -60,29 +60,29 @@ def detect_qr_code(frame):
     return data if data else None
 
 # Function to match QR code with pre-existing QR codes
-# def match_qr_code(seen_qr):
-#     akaze = cv2.AKAZE_create()  # Faster alternative to SIFT
-#     kp1, des1 = akaze.detectAndCompute(seen_qr, None)
+def match_qr_code(seen_qr):
+    akaze = cv2.AKAZE_create()  # Faster alternative to SIFT
+    kp1, des1 = akaze.detectAndCompute(seen_qr, None)
 
-#     best_match = None
-#     best_score = 0
+    best_match = None
+    best_score = 0
 
-#     for path, ref_qr in reference_qrs:
-#         kp2, des2 = akaze.detectAndCompute(ref_qr, None)
+    for path, ref_qr in reference_qrs:
+        kp2, des2 = akaze.detectAndCompute(ref_qr, None)
 
-#         if des1 is None or des2 is None:
-#             continue
+        if des1 is None or des2 is None:
+            continue
 
-#         bf = cv2.BFMatcher()
-#         matches = bf.knnMatch(des1, des2, k=2)
+        bf = cv2.BFMatcher()
+        matches = bf.knnMatch(des1, des2, k=2)
 
-#         good_matches = [m for m, n in matches if m.distance < 0.75 * n.distance]
+        good_matches = [m for m, n in matches if m.distance < 0.75 * n.distance]
 
-#         if len(good_matches) > best_score:
-#             best_score = len(good_matches)
-#             best_match = path
+        if len(good_matches) > best_score:
+            best_score = len(good_matches)
+            best_match = path
 
-#     return os.path.basename(best_match) if best_match else None
+    return os.path.basename(best_match) if best_match else None
 
 # Main loop
 prev_speed_left = 0
@@ -93,18 +93,21 @@ try:
     while time.time() - start_time < video_duration:
         # Capture frame from the camera
         frame = picam2.capture_array()
-
-        # Check for QR codes first
+        
         qr_data = detect_qr_code(frame)
+        # Check for QR codes first
         if qr_data:
             print(f"QR Code Detected: {qr_data}")
+            
+            # STOP the robot
             robot.stopcar()
-            # qr_match = match_qr_code(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
-            # if qr_match:
-            #     print(f"Best Matched QR Code: {qr_match}")
-            #     robot.stopcar()  # Example action: stop the robot
-            #     time.sleep(2)
-            continue  # Skip line detection if a QR code is found
+            print("Robot Stopped for QR Processing")
+            
+            # Convert frame to grayscale and match QR code
+            qr_match = match_qr_code(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
+            if qr_match:
+                print(f"Best Matched QR Code: {qr_match}")
+
 
         # Preprocess the frame to find the line's centroid
         cx = preprocess_image(frame)
