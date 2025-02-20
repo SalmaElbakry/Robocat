@@ -20,12 +20,12 @@ video_duration = 45
 frame_width, frame_height = 640, 480
 
 # Robot parameters
-# turn_speed = 0x5FFF
-# straight_speed = 0x5FFF
-# max_speed = 0x5FFF
-turn_speed = 0
-straight_speed = 0
-max_speed = 0
+turn_speed = 0x5FFF
+straight_speed = 0x5FFF
+max_speed = 0x5FFF
+# turn_speed = 0
+# straight_speed = 0
+# max_speed = 0
 # PID Controller for direction
 pid_direction = PID(Kp=264, Ki=528, Kd=33, setpoint=frame_width // 2)
 pid_direction.output_limits = (-max_speed // 2, max_speed // 2) 
@@ -109,6 +109,27 @@ try:
             qr_match = match_qr_code(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
             if qr_match:
                 print(f"Best Matched QR Code: {qr_match}")
+
+                # Execute actions based on matched QR code
+                if qr_match == "ref_1.jpg":
+                    print("Action: Stop 10s")
+                    robot.stopcar()
+                    time.sleep(10) 
+                elif qr_match == "ref_2.jpg":
+                    print("Action: 720")
+                    robot.turnLeft()
+                    time.sleep(2)
+
+                elif qr_match == "ref_0.jpg":
+                    print("Action: rotate")
+                    robot.turnLeft()
+                    time.sleep(0.5)  # Pause before resuming
+
+                else:
+                    print("Unknown QR code action.")
+
+            # Resume normal operation after QR processing
+            continue  # Skip to next frame (avoids running line-following in the same cycle)
 
 
         # Preprocess the frame to find the line's centroid
