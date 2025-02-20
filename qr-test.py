@@ -110,7 +110,6 @@ try:
             qr_match = match_qr_code(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
             if qr_match:
                 print(f"Best Matched QR Code: {qr_match}")
-
                 # Execute actions based on matched QR code
                 if qr_match == "ref_1.jpg":
                     print("Action: Stop 10s")
@@ -118,13 +117,15 @@ try:
                     time.sleep(10) 
                 elif qr_match == "ref_2.jpg":
                     print("Action: 720")
-                    robot.turnLeft()
-                    time.sleep(2)
+                    while time.time() - start_time < 2:
+                        robot.turnLeft()
+                    # time.sleep(2)
 
                 elif qr_match == "ref_0.jpg":
                     print("Action: rotate")
-                    robot.turnLeft()
-                    time.sleep(0.5)  # Pause before resuming
+                    while time.time() - start_time < 0.5:
+                        robot.turnLeft()
+                    # time.sleep(0.5)  # Pause before resuming
 
                 else:
                     print("Unknown QR code action.")
