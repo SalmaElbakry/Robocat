@@ -141,15 +141,19 @@ try:
                     time.sleep(10) 
                 elif qr_match == "ref_2.jpg":
                     print("Action: 720")
+                    robot.changespeed(turn_speed, turn_speed) 
                     start_time_720 = time.time()
+                    picam2.stop()
                     while time.time() - start_time_720 < 2:
                         robot.turnLeft()
                     # time.sleep(2)
 
                 elif qr_match == "ref_0.jpg":
                     print("Action: rotate")
+                    robot.changespeed(turn_speed, turn_speed) 
                     start_time_rotate = time.time()
-                    while time.time() - start_time < 0.5:
+                    picam2.stop() 
+                    while time.time() - start_time_rotate < 0.5:
                         robot.turnLeft()
                     # time.sleep(0.5)  # Pause before resuming
 
