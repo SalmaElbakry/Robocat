@@ -54,54 +54,85 @@ def preprocess_image(frame):
             cx = int(M["m10"] / M["m00"])
             return cx
     return None
-def detect_duck(frame):
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    lower_yellow = (20, 100, 100)
-    upper_yellow = (30, 255, 255)
+def detect_traffic_light(frame):
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
+    # Define color ranges for traffic lights
+    lower_red1 = np.array([0, 100, 100])
+    upper_red1 = np.array([10, 255, 255])
+    lower_red2 = np.array([160, 100, 100])
+    upper_red2 = np.array([180, 255, 255])
 
-    contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    lower_yellow = np.array([20, 100, 100])
+    upper_yellow = np.array([30, 255, 255])
 
-    for contour in contours:
-        area = cv2.contourArea(contour)
-        if area > 500:
-            return True
+    lower_green = np.array([40, 50, 50])
+    upper_green = np.array([90, 255, 255])
 
-    return False
-# Function to detect QR code in the frame
-def detect_qr_code(frame):
-    qr_detector = cv2.QRCodeDetector()
-    data, bbox, _ = qr_detector.detectAndDecode(frame)
-    return data if data else None
+    # Create masks for each color
+    mask_red = cv2.inRange(hsv, lower_red1, upper_red1) + cv2.inRange(hsv, lower_red2, upper_red2)
+    mask_yellow = cv2.inRange(hsv, lower_yellow, upper_yellow)
+    mask_green = cv2.inRange(hsv, lower_green, upper_green)
 
-# Function to match QR code with pre-existing QR codes
-def match_qr_code(seen_qr):
-    akaze = cv2.AKAZE_create()  # Faster alternative to SIFT
-    kp1, des1 = akaze.detectAndCompute(seen_qr, None)
+    # Find contours for each mask
+    if np.sum(mask_red) > np.sum(mask_yellow) and np.sum(mask_red) > np.sum(mask_green):
+        return "red"
+    elif np.sum(mask_yellow) > np.sum(mask_red) and np.sum(mask_yellow) > np.sum(mask_green):
+        return "yellow"
+    elif np.sum(mask_green) > np.sum(mask_red) and np.sum(mask_green) > np.sum(mask_yellow):
+        return "green"
+    
+    return None
 
-    best_match = None
-    best_score = 0
+# def detect_duck(frame):
+#     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    for path, ref_qr in reference_qrs:
-        kp2, des2 = akaze.detectAndCompute(ref_qr, None)
+#     lower_yellow = (20, 100, 100)
+#     upper_yellow = (30, 255, 255)
 
-        if des1 is None or des2 is None:
-            continue
+#     mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
 
-        bf = cv2.BFMatcher()
-        matches = bf.knnMatch(des1, des2, k=2)
+#     contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-        good_matches = [m for m, n in matches if m.distance < 0.75 * n.distance]
+#     for contour in contours:
+#         area = cv2.contourArea(contour)
+#         if area > 500:
+#             return True
 
-        if len(good_matches) > best_score:
-            best_score = len(good_matches)
-            best_match = path
+#     return False
+# # Function to detect QR code in the frame
+# def detect_qr_code(frame):
+#     qr_detector = cv2.QRCodeDetector()
+#     data, bbox, _ = qr_detector.detectAndDecode(frame)
+#     return data if data else None
 
-    return os.path.basename(best_match) if best_match else None
+# # Function to match QR code with pre-existing QR codes
+# def match_qr_code(seen_qr):
+#     akaze = cv2.AKAZE_create()  # Faster alternative to SIFT
+#     kp1, des1 = akaze.detectAndCompute(seen_qr, None)
 
-# Main loop
+#     best_match = None
+#     best_score = 0
+
+#     for path, ref_qr in reference_qrs:
+#         kp2, des2 = akaze.detectAndCompute(ref_qr, None)
+
+#         if des1 is None or des2 is None:
+#             continue
+
+#         bf = cv2.BFMatcher()
+#         matches = bf.knnMatch(des1, des2, k=2)
+
+#         good_matches = [m for m, n in matches if m.distance < 0.75 * n.distance]
+
+#         if len(good_matches) > best_score:
+#             best_score = len(good_matches)
+#             best_match = path
+
+#     return os.path.basename(best_match) if best_match else None
+
+# # Main loop
 prev_speed_left = 0
 prev_speed_right = 0
 
@@ -109,60 +140,78 @@ start_time = time.time()
 try:
     while time.time() - start_time < video_duration:
         # Capture frame from the camera
+        # frame = picam2.capture_array()
+        
+        # qr_data = detect_qr_code(frame)
+        
+        # if detect_duck(frame):
+        #     print("Remove duck to resume")
+        #     robot.stopcar()
+        #     time.sleep(3)  # Wait for the duck to move (adjust time as needed)
+        #     continue 
+        
+        # # Check for QR codes first
+
+
+        # if qr_data:
+        #     print(f"QR Code Detected: {qr_data}")
+            
+        #     # STOP the robot
+        #     robot.stopcar()
+        #     time.sleep(1)
+        #     print("Robot Stopped for QR Processing")
+            
+        #     # Convert frame to grayscale and match QR code
+        #     qr_match = match_qr_code(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
+        #     if qr_match:
+        #         print(f"Best Matched QR Code: {qr_match}")
+        #         # Execute actions based on matched QR code
+        #         if qr_match == "ref_1.jpg":
+        #             print("Action: Stop 10s")
+        #             robot.stopcar()
+        #             time.sleep(10) 
+        #         elif qr_match == "ref_2.jpg":
+        #             print("Action: 720")
+        #             robot.changespeed(turn_speed, turn_speed) 
+        #             start_time_720 = time.time()
+        #             picam2.stop()
+        #             while time.time() - start_time_720 < 4:
+        #                 robot.turnLeft()
+        #             # time.sleep(2)
+
+        #         elif qr_match == "ref_0.jpg":
+        #             print("Action: rotate")
+        #             robot.changespeed(turn_speed, turn_speed) 
+        #             start_time_rotate = time.time()
+        #             picam2.stop() 
+        #             while time.time() - start_time_rotate < 1:
+        #                 robot.turnLeft()
+        #             # time.sleep(0.5)  # Pause before resuming
+
+        #         else:
+        #             print("Unknown QR code action.")
+        #     # Resume normal operation after QR processing
+        #     continue  # Skip to next frame (avoids running line-following in the same cycle)
+
+        # Capture frame
         frame = picam2.capture_array()
-        
-        qr_data = detect_qr_code(frame)
-        
-        if detect_duck(frame):
-            print("Remove duck to resume")
+
+        # Detect traffic light
+        traffic_light = detect_traffic_light(frame)
+
+        if traffic_light == "red":
+            print("🚦 Red Light Detected: Stopping")
             robot.stopcar()
-            time.sleep(3)  # Wait for the duck to move (adjust time as needed)
-            continue 
-        
-        # Check for QR codes first
+            time.sleep(3)
+            continue  # Skip other processing
 
+        elif traffic_light == "yellow":
+            print("🚦 Yellow Light Detected: Slowing Down")
+            robot.changespeed(straight_speed // 2, straight_speed // 2)
 
-        if qr_data:
-            print(f"QR Code Detected: {qr_data}")
-            
-            # STOP the robot
-            robot.stopcar()
-            time.sleep(1)
-            print("Robot Stopped for QR Processing")
-            
-            # Convert frame to grayscale and match QR code
-            qr_match = match_qr_code(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
-            if qr_match:
-                print(f"Best Matched QR Code: {qr_match}")
-                # Execute actions based on matched QR code
-                if qr_match == "ref_1.jpg":
-                    print("Action: Stop 10s")
-                    robot.stopcar()
-                    time.sleep(10) 
-                elif qr_match == "ref_2.jpg":
-                    print("Action: 720")
-                    robot.changespeed(turn_speed, turn_speed) 
-                    start_time_720 = time.time()
-                    picam2.stop()
-                    while time.time() - start_time_720 < 4:
-                        robot.turnLeft()
-                    # time.sleep(2)
-
-                elif qr_match == "ref_0.jpg":
-                    print("Action: rotate")
-                    robot.changespeed(turn_speed, turn_speed) 
-                    start_time_rotate = time.time()
-                    picam2.stop() 
-                    while time.time() - start_time_rotate < 1:
-                        robot.turnLeft()
-                        time.sleep(0.5)
-                    # time.sleep(0.5)  # Pause before resuming
-
-                else:
-                    print("Unknown QR code action.")
-            # Resume normal operation after QR processing
-            continue  # Skip to next frame (avoids running line-following in the same cycle)
-
+        elif traffic_light == "green":
+            print("🚦 Green Light Detected: Proceeding")
+            robot.forward()
 
         # Preprocess the frame to find the line's centroid
         cx = preprocess_image(frame)
