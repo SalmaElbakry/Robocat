@@ -16,13 +16,13 @@ picam2.start()
 
 # Video settings
 frame_rate = 30
-video_duration = 45
+video_duration = 300
 frame_width, frame_height = 640, 480
 
 # Robot parameters
-turn_speed = 0x5FFF
-straight_speed = 0x5FFF
-max_speed = 0x5FFF
+turn_speed = 0x6FFF
+straight_speed = 0x7AFF
+max_speed = 0x7AFF
 # turn_speed = 0
 # straight_speed = 0
 # max_speed = 0
@@ -144,7 +144,7 @@ try:
                     robot.changespeed(turn_speed, turn_speed) 
                     start_time_720 = time.time()
                     picam2.stop()
-                    while time.time() - start_time_720 < 2:
+                    while time.time() - start_time_720 < 4:
                         robot.turnLeft()
                     # time.sleep(2)
 
@@ -153,8 +153,9 @@ try:
                     robot.changespeed(turn_speed, turn_speed) 
                     start_time_rotate = time.time()
                     picam2.stop() 
-                    while time.time() - start_time_rotate < 0.5:
+                    while time.time() - start_time_rotate < 1:
                         robot.turnLeft()
+                        time.sleep(0.5)
                     # time.sleep(0.5)  # Pause before resuming
 
                 else:
