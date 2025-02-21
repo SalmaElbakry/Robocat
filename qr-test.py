@@ -54,7 +54,22 @@ def preprocess_image(frame):
             cx = int(M["m10"] / M["m00"])
             return cx
     return None
+def detect_duck(frame):
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
+    lower_yellow = (20, 100, 100)
+    upper_yellow = (30, 255, 255)
+
+    mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
+
+    contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    for contour in contours:
+        area = cv2.contourArea(contour)
+        if area > 500:
+            return True
+
+    return False
 # Function to detect QR code in the frame
 def detect_qr_code(frame):
     qr_detector = cv2.QRCodeDetector()
@@ -96,7 +111,7 @@ try:
         # Capture frame from the camera
         frame = picam2.capture_array()
         
-        qr_data = detect_qr_code(frame)
+        qr_data = detect_qr_code.decode(frame)[0]
         # Check for QR codes first
         if qr_data:
             print(f"QR Code Detected: {qr_data}")
@@ -129,7 +144,6 @@ try:
 
                 else:
                     print("Unknown QR code action.")
-
             # Resume normal operation after QR processing
             continue  # Skip to next frame (avoids running line-following in the same cycle)
 
