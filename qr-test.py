@@ -111,8 +111,17 @@ try:
         # Capture frame from the camera
         frame = picam2.capture_array()
         
-        qr_data = detect_qr_code.decode(frame)[0]
+        qr_data = detect_qr_code(frame)
+        
+        if detect_duck(frame):
+            print("Remove duck to resume")
+            robot.stopcar()
+            time.sleep(3)  # Wait for the duck to move (adjust time as needed)
+            continue 
+        
         # Check for QR codes first
+
+
         if qr_data:
             print(f"QR Code Detected: {qr_data}")
             
