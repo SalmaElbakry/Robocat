@@ -141,12 +141,14 @@ try:
                     time.sleep(10) 
                 elif qr_match == "ref_2.jpg":
                     print("Action: 720")
-                    while time.time() - start_time < 2:
+                    start_time_720 = time.time()
+                    while time.time() - start_time_720 < 2:
                         robot.turnLeft()
                     # time.sleep(2)
 
                 elif qr_match == "ref_0.jpg":
                     print("Action: rotate")
+                    start_time_rotate = time.time()
                     while time.time() - start_time < 0.5:
                         robot.turnLeft()
                     # time.sleep(0.5)  # Pause before resuming
